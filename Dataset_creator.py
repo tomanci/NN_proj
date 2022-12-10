@@ -36,6 +36,7 @@ class Dataset():
                 im = Image.open(dir).crop((30,55,150,175)).resize((64,64)).convert("L")
                 im.save(str(path_dataset+"/"+photo))
 
+ 
             
 
 
