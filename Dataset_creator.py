@@ -20,23 +20,23 @@ class Dataset():
             shutil.unpack_archive(self.path_source, self.path_destination)    
             
         
-        def preprocessing(self):
-            import os
-            import PIL
-            from PIL import Image
+    def preprocessing(self):
+        import os
+        import PIL
+        from PIL import Image
 
-            current_path = os.path.join(os.getcwd(),"img_celeba_dataset")
-            path_dataset = os.path.join(os.getcwd(),"dataset")
-            os.mkdir(path_dataset)
+        current_path = os.path.join(os.getcwd(),"img_celeba_dataset")
+        path_dataset = os.path.join(os.getcwd(),"dataset")
+        os.mkdir(path_dataset)
 
-            for photo in os.listdir(current_path):
+        for photo in os.listdir(current_path):
 
-                dir = os.path.join(current_path,photo)
+            dir = os.path.join(current_path,photo)
 
-                im = Image.open(dir).crop((30,55,150,175)).resize((64,64)).convert("L")
-                im.save(str(path_dataset+"/"+photo))
+            im = Image.open(dir).crop((30,55,150,175)).resize((64,64)).convert("L")
+            im.save(str(path_dataset+"/"+photo))
 
- 
-            
+
+
 
 
