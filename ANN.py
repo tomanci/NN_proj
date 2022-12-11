@@ -1,5 +1,5 @@
-class Generator: #può sia essere il Generator nelle GAN che una classica NN negli adversarial attack
-
+class Generator(): #può sia essere il Generator nelle GAN che una classica NN negli adversarial attack
+    TODO #1
     """
     input: tensor (64,64,3) x,y,z dimension
 
@@ -32,6 +32,6 @@ class Generator: #può sia essere il Generator nelle GAN che una classica NN neg
     
     def forward(self, x_input):
 
-      self.output = self.net(x_input)*256
+      self.output = self.net(x_input)*255
 
       return self.output
