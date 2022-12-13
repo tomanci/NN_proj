@@ -74,16 +74,19 @@ class Discriminator():
     def __init__(self):
         self.layers = []
 
-        self.layers.append(nn.Conv2d(3,32,kernel_size=7,padding = "same"))#64x64
-        self.layers.append(nn.AvgPool2d(2,stride=2))#32x32
+        self.layers.append(nn.Conv2d(3,32,kernel_size=7,padding = "same"))#64x64x32
+        self.layers.append(nn.AvgPool2d(2,stride=2))#32x32x32
+        self.layers.append(nn.LeakyReLU(inplace=True))
 
+        self.layers.append(nn.Conv2d(32,64,kernel_size=5,padding="same"))#32x32x64
+        self.layers.append(nn.AvgPool2d(2,stride=2))#16x16x64
+        self.layers.append(nn.LeakyReLU(inplace=True))
 
-        self.layers.append(nn.Conv2d(32,64,kernel_size=5,padding="same"))#32x32
-        self.layers.append(nn.AvgPool2d(2,stride=2))#16x16
+        self.layers.append(nn.Conv2d(64,128,kernel_size=3,padding=1,stride=2))#8x8x128
+        self.layers.append(nn.ReLU(inplace=True))
 
-        self.layers.append(nn.Conv2d(64,128,kernel_size=3,padding=1,stride=2))#8x8
-
-        self.layers.append(nn.Conv2d(128,256,kernel_size=3,padding=1,stride=2))#4x4
+        self.layers.append(nn.Conv2d(128,256,kernel_size=3,padding=1,stride=2))#4x4x256
+        self.layers.append(nn.ReLU(inplace=True))
 
         self.layers.append(nn.Flatten())#256X16
 
