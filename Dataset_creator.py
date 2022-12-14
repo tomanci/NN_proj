@@ -67,7 +67,7 @@ class Dataset():
                 #in sequence, I open the photo, crop it, resize(downsampled to a 64x64 resolution) and convert into a greyscale  
                 im = Image.open(dir).crop((20,45,150,185)).resize((64,64)).convert("L")#140x140 before resize #crop((30,55,150,175))#120x120
                 #save the new image into that directory
-                im.save(str(path_dataset+"/"+photo))
+                im.save(str(path_dataset+"/"+"real_"+photo))
 
         print("counter photos {} counter dataset {} ratio {}".format(self.counter_photos,self.counter_dataset, self.counter_dataset/self.counter_photos))
 
