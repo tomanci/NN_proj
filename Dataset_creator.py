@@ -65,7 +65,7 @@ class Dataset():
                 dir = os.path.join(self.path_destination,photo)
 
                 #in sequence, I open the photo, crop it, resize(downsampled to a 64x64 resolution) and convert into a greyscale  
-                im = Image.open(dir).crop((30,55,150,175)).resize((64,64)).convert("L")
+                im = Image.open(dir).crop((20,45,150,185)).resize((64,64)).convert("L")#140x140 before resize #crop((30,55,150,175))#120x120
                 #save the new image into that directory
                 im.save(str(path_dataset+"/"+photo))
 
