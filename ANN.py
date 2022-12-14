@@ -41,6 +41,18 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
       return self.output
 
+
+    def image_generation(self):
+      """
+      This function will be used to display a image or more after ending each batch/epoch...
+      """
+
+      random_input = torch.rand((3,64,64))
+      transform = T.ToPILImage()
+      im =transform(self.forward(random_input))
+
+      return im.show()
+
     def summary(self):
     
       total_param = 0
