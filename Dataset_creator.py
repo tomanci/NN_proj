@@ -49,8 +49,8 @@ class Dataset():
         #self.path_destination = #current_path = os.path.join(os.getcwd(),"img_celeba_dataset")
 
         #creation of the path where the new dataset will be stored
-        path_dataset = os.path.join(os.getcwd(),"dataset")
-        os.mkdir(path_dataset)
+        self.path_dataset = os.path.join(os.getcwd(),"dataset")
+        os.mkdir(self.path_dataset)
 
         self.counter_photos = 0
         self.counter_dataset = 0
@@ -67,9 +67,29 @@ class Dataset():
                 #in sequence, I open the photo, crop it, resize(downsampled to a 64x64 resolution) and convert into a greyscale  
                 im = Image.open(dir).crop((20,45,150,185)).resize((64,64)).convert("L")#140x140 before resize #crop((30,55,150,175))#120x120
                 #save the new image into that directory
-                im.save(str(path_dataset+"/"+"real_"+photo))
+                im.save(str(self.path_dataset+"/"+"real_"+photo))
 
         print("counter photos {} counter dataset {} ratio {}".format(self.counter_photos,self.counter_dataset, self.counter_dataset/self.counter_photos))
+
+    
+    def shuffled_dataset(self):
+
+        """
+        mixed the dataset, by returning a list containing the path of every single image, which will be needed when we have to upload the mini batch
+        a stupid example of an entries of self.files is like: "/Users/tommasoancilli/Desktop/Python/NN_proj/dataset/real_8328239.jpg"
+        """
+
+        self.files = [os.path.join(self.path_dataset,f) for f in os.listdir(self.path_dataset)]
+        self.true_labels = [1]*len(self.files)
+
+        shuffled_list = torch.randperm(len(self.files))
+
+        self.files = [self.files[i] for i in shuffled_list]
+        self.true_labels = [self.true_labels[i] for i in shuffled_list]
+
+        return self.files, self.true_labels
+
+
 
 
 
