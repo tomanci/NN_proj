@@ -37,9 +37,21 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     
     def forward(self, x_input):
 
-      self.output = self.net(x_input)*255
+      """
+      ----- Input -----
+      x_input -> tensor, dimension #example_mini_batch x #channels x width x height 
 
-      return self.output
+      ----- Output ----
+      self.image_output -> tensor, dimension #example_mini_batch #channels x width x height 
+      self.label_fake_img -> tensor, dimension 1 x #example_mini_batch
+
+      """
+
+      self.image_output = self.net(x_input)*255
+      
+      self.label_fake_img = torch.tensor([[0]*len(x_input)])
+
+      return self.image_output,self.label_fake_img
 
 
     def image_generation(self):
@@ -83,6 +95,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
 
 class Discriminator():
+
     def __init__(self):
         self.layers = []
 
@@ -108,4 +121,47 @@ class Discriminator():
 
         self.net = nn.Sequential(*self.layers)
 
-        #MANCANDO DA METTERCI LE ReLU oppure BatchNormalization o cose simili 
+    
+    def shuffled_True_Fake(self, fake_labels, fake_images, true_labels, true_images):
+      """
+        ----- Input ----
+        fake_labels, fake_images, true_labels, true_images -> tensor
+        dimensions:
+        fake_images, true images = #of_example_mini_batch x #channles x width x height
+        fake/true labels = 1x#of_example_mini_batch
+
+        ----- Output ------
+        shuffled_images, shuffled_label -> tensor
+        dimension:
+        shuffled_label = 1 x #examples_mini_batch
+        shuffled_images = 2*#examples_mini_batch x width x height 
+
+      """
+
+      if len(fake_labels) != len(true_labels) and fake_images.shape != true_images.shape:
+        raise ValueError("THE DIMENSIONS ARE NOT THE SAME!")
+
+      combined_images = torch.stack([true_images,fake_images],dim=0)
+      # combined_images dimension = 2(number of tensor combined into a list) x #mini_batches x channels x width x height
+      combined_images = combined_images.view(
+        combined_images.shape[0]*combined_images.shape[1],
+        combined_images.shape[2],combined_images.shape[3],combined_images.shape[4]
+      )
+      #with view I reshape the dimension, compressing the first two dimention into a single one.
+      #it's like pilling up the tensor one after the other in the dimension of the mini batches 
+
+      #hstack -> it stacks the tensor horizionally, so from two tensor of shape [1,n] and [1,n] it prints out [1,2*n]
+      combined_labels = torch.hstack([true_labels,fake_labels])
+      combined_labels = combined_labels.view(-1,1)
+      #view(-1,1) it's like numpy.reshape and it "transpose" creating a [2*n,1] vector 
+
+      shuffled_vector = torch.randperm(combined_images.shape[0])
+
+      shuffled_images = [combined_images[i] for i in shuffled_vector]
+      shuffled_labels = [combined_labels[i] for i in shuffled_vector]
+
+      shuffled_images = torch.stack(shuffled_images,dim=0)
+      shuffled_labels = torch.stack(shuffled_labels,dim =0)
+
+      return shuffled_images,shuffled_labels
+      
