@@ -3,12 +3,15 @@ class Dataset():
     We transfer the kaggle dataset into a folder where the python environment is. 
     path_source is where the kaggle dataset downloaded is, path destination is where it should be placed the unzipped dataset.[by default there are my paths] 
     """
-
+TODO #4
     def __init__(self,device,path_source = "/Users/tommasoancilli/Downloads/img_celeba_dataset.zip",path_destination= "/Users/tommasoancilli/Desktop/Python/NN_proj/img_celeba_dataset"):
 
         self.path_source = path_source
         self.path_destination = path_destination
         self.device = device
+        self.file_id = 0
+        self.files = []
+        self.true_labels = []
 
         if self.device == "colab":
             !pip install unzip
@@ -18,8 +21,6 @@ class Dataset():
             !unzip "/content/img_celeba_dataset.zip" -d "/content"
         
         elif self.device == "local":
-
-            import shutil
 
             shutil.unpack_archive(self.path_source, self.path_destination)    
             
@@ -38,10 +39,6 @@ class Dataset():
         2) downsampled to 64x64 resolution
         3) converted from a RGB to a grayscale image [computational reason]
         """
-
-        import os
-        import PIL
-        from PIL import Image
 
         self.p_subset = p_subset
 
@@ -72,27 +69,95 @@ class Dataset():
         print("counter photos {} counter dataset {} ratio {}".format(self.counter_photos,self.counter_dataset, self.counter_dataset/self.counter_photos))
 
     
-    def shuffled_dataset(self):
+    def shuffled_dataset(self,boolean_shuffle=True):
 
         """
         mixed the dataset, by returning a list containing the path of every single image, which will be needed when we have to upload the mini batch
         a stupid example of an entries of self.files is like: "/Users/tommasoancilli/Desktop/Python/NN_proj/dataset/real_8328239.jpg"
         """
+        self.path_dataset = os.path.join(os.getcwd(),"dataset")
 
         self.files = [os.path.join(self.path_dataset,f) for f in os.listdir(self.path_dataset)]
         self.true_labels = [1]*len(self.files)
 
-        shuffled_list = torch.randperm(len(self.files))
+        if boolean_shuffle:
+            shuffled_list = torch.randperm(len(self.files))
 
-        self.files = [self.files[i] for i in shuffled_list]
-        self.true_labels = [self.true_labels[i] for i in shuffled_list]
+            self.files = [self.files[i] for i in shuffled_list]
+            self.true_labels = [self.true_labels[i] for i in shuffled_list]
 
         return self.files, self.true_labels
 
 
+    def load_and_conversion(self):
+
+        """
+in questo modo praticamente carico sempre il dato, quando raggiungo la fine, riazzero il contatore file_id che è globale a quanto pare 
+
+        """
+
+        self.end_dataset = False
+
+        im = Image.open(self.files[self.file_id]).crop((20,45,150,185)).resize((64,64)).convert("L")
+        label = self.true_labels[self.file_id]
+         
+        convert_tensor = transforms.ToTensor()
+
+        img_tensor = convert_tensor(im)
+        label_tensor = torch.tensor(label)
+
+        if self.file_id < len(self.files)-1:
+            self.file_id = self.file_id +1
+        else:
+            self.end_dataset = True
+            self.file_id = 0 #reset the index
+
+
+        return img_tensor,label_tensor,self.end_dataset
+
+
+
+    def mini_batch_creation(self, batch_size):
+        """
+        
+        """
+        i = 0
+        self.data_batch_im = []
+        self.data_batch_label = []
+
+        last_batch_flag = False
+
+        while i < batch_size:
+            
+            img,label,end_dataset_flag = self.load_and_conversion()
+
+            self.data_batch_im.append(img)
+            self.data_batch_label.append(label)
+            last_batch = end_dataset_flag
+
+            i = i + 1
+
+            if last_batch:
+                last_batch_flag = True
+                break
+        
+        mini_batch_image = torch.stack(self.data_batch_im,dim=0)
+        mini_batch_label = torch.stack(self.data_batch_label,dim=0)
+
+        return mini_batch_image, mini_batch_label
 
 
 
 
+"""
+queste due ultime funzioni dovrebbero essere coloro che mi permettano di caricare e gestire i mini_batch. Infatti, la prima funzione load_and_conversion mi 
+carica in una immagine e la rispettiva label, convertendole in tensori
+
+la seconda invece mi crea un tensore in 4D ( #example mini batch x channels x width x height). Mi restituisce anche la fine del dataset così che da segnalare 
+la fine di un epoca 
+
+TUTTO DA TESTARE PERCHè NON L'HO FATTO 
+
+"""
 
 
