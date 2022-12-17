@@ -2,6 +2,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     TODO #1
     TODO #2
     TODO #3
+    TODO #5
     """
     input: tensor (64,64,3) x,y,z dimension
 
@@ -34,6 +35,8 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
         self.net = nn.Sequential(*self.layers)
 
+        self.position = 0
+
     
     def forward(self, x_input):
 
@@ -60,10 +63,58 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       """
 
       random_input = torch.rand((3,64,64))
-      transform = T.ToPILImage()
-      im =transform(self.forward(random_input))
+      transform = T.ToPILImage()#function to transform a tensor into a image
+      im = transform(self.forward(random_input))
 
       return im.show()
+
+
+    def creation_image(self, length_dataset):
+      """
+      img tensore creato
+      copntrolla lunghezza dataset e si accorge di essere dentro; se si mi stampa l'immagine 
+      """
+
+      img = torch.rand((3,64,64))
+      end_dataset = False
+      
+      if self.position <  length_dataset -1:
+        self.position = self.position +1 
+      else:
+        self.position = 0
+        end_dataset = True
+
+      return img, end_dataset
+    
+    def input_creation(self,length_dataset,batch_size):
+      """
+      concatena più immagini a formare un tensore 4D. I label non ne ho bisofno in quanto li creo in forward che so di già come sono, ovvero tutti falsi 
+      
+      """
+      length_dataset = length_dataset
+      i = 0
+      self.batch_input = []
+
+      last_batch = False
+
+      while i < batch_size:
+
+        img,end_dataset_flag = self.creation_image(length_dataset)
+        self.batch_input.append(img)
+        last_batch = end_dataset_flag
+
+        i = i + 1
+      
+        if not last_batch:
+          break
+
+      batch_input = torch.stack(batch_input,dim = 0)
+
+      return batch_input 
+
+    """
+    DA TESTARE LE DUE FUNZIONI... SONO COME QUELLE IN DATASET QUINDI DOVREBBE ESSRE ABBASTANZA VELOCE COME COSA
+    """
 
     def summary(self):
     
