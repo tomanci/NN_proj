@@ -92,13 +92,18 @@ TODO #4
     def load_and_conversion(self):
 
         """
-in questo modo praticamente carico sempre il dato, quando raggiungo la fine, riazzero il contatore file_id che è globale a quanto pare 
+        ----- INPUT -----
 
+        ----- OUTPUT -----
+
+        img_tensor : tensor of the image, being converted from a .jpg format to a tensor one
+        label_tensor : tensor of the label 
+        end_dataset : flag showing the bottom of the dataset 
         """
 
         self.end_dataset = False
 
-        im = Image.open(self.files[self.file_id]).crop((20,45,150,185)).resize((64,64)).convert("L")
+        im = Image.open(self.files[self.file_id])
         label = self.true_labels[self.file_id]
          
         convert_tensor = transforms.ToTensor()
@@ -119,7 +124,15 @@ in questo modo praticamente carico sempre il dato, quando raggiungo la fine, ria
 
     def mini_batch_creation(self, batch_size):
         """
-        
+        ------ INPUT ------
+        batch_size: given by the users 
+
+        ----- OUTPUT -----
+        mini_batch_image: batch of images, its shape is a 4D tensor #batch_size x #channels x width x height
+        mini_batch_labels: batch of labels, its a 1D tensor: #batch_size
+        last_batch_flag: flag variable to say when we have reached the last batch. In this way, in the training function it will indicate the end of a epoch 
+
+
         """
         i = 0
         self.data_batch_im = []
@@ -144,20 +157,7 @@ in questo modo praticamente carico sempre il dato, quando raggiungo la fine, ria
         mini_batch_image = torch.stack(self.data_batch_im,dim=0)
         mini_batch_label = torch.stack(self.data_batch_label,dim=0)
 
-        return mini_batch_image, mini_batch_label
+        return mini_batch_image, mini_batch_label, last_batch_flag
 
-
-
-
-"""
-queste due ultime funzioni dovrebbero essere coloro che mi permettano di caricare e gestire i mini_batch. Infatti, la prima funzione load_and_conversion mi 
-carica in una immagine e la rispettiva label, convertendole in tensori
-
-la seconda invece mi crea un tensore in 4D ( #example mini batch x channels x width x height). Mi restituisce anche la fine del dataset così che da segnalare 
-la fine di un epoca 
-
-TUTTO DA TESTARE PERCHè NON L'HO FATTO 
-
-"""
 
 
