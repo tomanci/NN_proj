@@ -71,8 +71,11 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
     def creation_image(self, length_dataset):
       """
-      img tensore creato
-      copntrolla lunghezza dataset e si accorge di essere dentro; se si mi stampa l'immagine 
+      ----- INPUT -----
+      length_dataset -> int value
+
+      ----- OUTPUT ------
+      a tensor image (img) and a boolean function if the we have reached the end of the dataset
       """
 
       img = torch.rand((3,64,64))
@@ -88,8 +91,12 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     
     def input_creation(self,length_dataset,batch_size):
       """
-      concatena più immagini a formare un tensore 4D. I label non ne ho bisofno in quanto li creo in forward che so di già come sono, ovvero tutti falsi 
-      
+      ----- INPUT -----
+      length_dataset -> int value 
+      batch_size -> int value
+
+      ----- OUTPUT -----
+      batch_input, 4D tensor: #sample_batch x #channels x width x height      
       """
       length_dataset = length_dataset
       i = 0
@@ -105,16 +112,13 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
         i = i + 1
       
-        if not last_batch:
+        if last_batch:
           break
 
-      batch_input = torch.stack(batch_input,dim = 0)
+      batch_input = torch.stack(self.batch_input,dim = 0)
 
-      return batch_input 
+      return batch_input, last_batch
 
-    """
-    DA TESTARE LE DUE FUNZIONI... SONO COME QUELLE IN DATASET QUINDI DOVREBBE ESSRE ABBASTANZA VELOCE COME COSA
-    """
 
     def summary(self):
     
