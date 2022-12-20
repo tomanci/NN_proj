@@ -3,6 +3,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     TODO #2
     TODO #3
     TODO #5
+    TODO #6
     """
     input: tensor (64,64,3) x,y,z dimension
 
@@ -38,7 +39,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
         self.position = 0
 
     
-    def forward(self, x_input):
+    def forward_G(self, x_input):
 
       """
       ----- Input -----
@@ -57,6 +58,22 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       return self.image_output,self.label_fake_img
 
 
+    def function_loss_G(self,output_label_gen,true_label):
+      """
+      ----- INPUT -----
+      output_label_gen -> tensor 1 x #batch_sample
+      true_label -> tensor 1 x #batch_sample
+      ----- OUTPUT -----
+
+      loss function. 
+      (it is negative because we want to maximize and generally backprop follows the discent of the gradient, so the max = - min )
+      """
+      cost_function = nn.BCELoss()
+      loss = -cost_function(output_label_gen,true_label)
+
+      return loss
+
+
     def image_generation(self):
       """
       This function will be used to display a image or more after ending each batch/epoch...
@@ -64,7 +81,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
       random_input = torch.rand((3,64,64))
       transform = T.ToPILImage()#function to transform a tensor into a image
-      im = transform(self.forward(random_input))
+      im = transform((self.net(random_input)*255))
 
       return im.show()
 
@@ -96,7 +113,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       batch_size -> int value
 
       ----- OUTPUT -----
-      batch_input, 4D tensor: #sample_batch x #channels x width x height      
+      batch_input, 4D tensor: #sample_batch x #channels x width x height  
       """
       length_dataset = length_dataset
       i = 0
@@ -177,7 +194,7 @@ class Discriminator():
         self.net = nn.Sequential(*self.layers)
 
     
-    def shuffled_True_Fake(self, fake_labels, fake_images, true_labels, true_images):
+    def combined_True_Fake(self, fake_labels, fake_images, true_labels, true_images):
       """
         ----- Input ----
         fake_labels, fake_images, true_labels, true_images -> tensor
@@ -186,10 +203,10 @@ class Discriminator():
         fake/true labels = 1x#of_example_mini_batch
 
         ----- Output ------
-        shuffled_images, shuffled_label -> tensor
+        combined_images, combined_label -> tensor
         dimension:
-        shuffled_label = 1 x #examples_mini_batch
-        shuffled_images = 2*#examples_mini_batch x width x height 
+        combined_label = 1 x #examples_mini_batch
+        combined_images = 2*#examples_mini_batch x width x height 
 
       """
 
@@ -210,13 +227,31 @@ class Discriminator():
       combined_labels = combined_labels.view(-1,1)
       #view(-1,1) it's like numpy.reshape and it "transpose" creating a [2*n,1] vector 
 
-      shuffled_vector = torch.randperm(combined_images.shape[0])
+      return combined_images,combined_labels
 
-      shuffled_images = [combined_images[i] for i in shuffled_vector]
-      shuffled_labels = [combined_labels[i] for i in shuffled_vector]
+    def forward_D(self,images):
+      """
+      ----- INPUT -----
+      image -> tensor 2*#batch_size x #channels x width x height
 
-      shuffled_images = torch.stack(shuffled_images,dim=0)
-      shuffled_labels = torch.stack(shuffled_labels,dim =0)
-
-      return shuffled_images,shuffled_labels
+      ----- OUTPUT -----
+      tensor -> 2*#batch_size x 1
+      """
+      self.output = self.net(images)
+      return self.output 
       
+    def function_loss_D(self,output_label_dis,true_label):
+      """
+      ----- INPUT -----
+      output_label_dis -> 2*#batch_size x 1
+      true_label -> 2*#batch_size x 1 
+      
+      ----- OUTPUT -----
+      loss function
+
+      """
+      cost_function = nn.BCELoss()
+      
+      loss = cost_function(output_label_dis,true_label)
+
+      return loss
