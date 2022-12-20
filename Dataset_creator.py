@@ -129,7 +129,7 @@ TODO #4
 
         ----- OUTPUT -----
         mini_batch_image: batch of images, its shape is a 4D tensor #batch_size x #channels x width x height
-        mini_batch_labels: batch of labels, its a 1D tensor: #batch_size
+        mini_batch_labels: batch of labels, its a tensor: 1 x #batch_size 
         last_batch_flag: flag variable to say when we have reached the last batch. In this way, in the training function it will indicate the end of a epoch 
 
 
@@ -155,7 +155,7 @@ TODO #4
                 break
         
         mini_batch_image = torch.stack(self.data_batch_im,dim=0)
-        mini_batch_label = torch.stack(self.data_batch_label,dim=0)
+        mini_batch_label = torch.stack(self.data_batch_label,dim=0).view(1,-1)
 
         return mini_batch_image, mini_batch_label, last_batch_flag
 
