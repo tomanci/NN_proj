@@ -65,7 +65,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       true_label -> tensor 1 x #batch_sample
       ----- OUTPUT -----
 
-      loss function. 
+      loss function. (scalar value)
       (it is negative because we want to maximize and generally backprop follows the discent of the gradient, so the max = - min )
       """
       cost_function = nn.BCELoss()
@@ -247,7 +247,7 @@ class Discriminator():
       true_label -> 2*#batch_size x 1 
       
       ----- OUTPUT -----
-      loss function
+      loss function (scalar value)
 
       """
       cost_function = nn.BCELoss()
