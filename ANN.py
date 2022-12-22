@@ -69,6 +69,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       (it is negative because we want to maximize and generally backprop follows the discent of the gradient, so the max = - min )
       """
       cost_function = nn.BCELoss()
+      true_label = true_label.to(torch.float)
       loss = -cost_function(output_label_gen,true_label)
 
       return loss
@@ -238,6 +239,7 @@ class Discriminator():
       tensor -> 2*#batch_size x 1
       """
       self.output = self.net(images)
+      self.output = self.output.to(torch.float32)
       return self.output 
       
     def function_loss_D(self,output_label_dis,true_label):
@@ -251,7 +253,7 @@ class Discriminator():
 
       """
       cost_function = nn.BCELoss()
-      
+      true_label = true_label.to(torch.float)
       loss = cost_function(output_label_dis,true_label)
 
       return loss

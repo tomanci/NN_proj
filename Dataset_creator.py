@@ -62,7 +62,7 @@ TODO #4
                 dir = os.path.join(self.path_destination,photo)
 
                 #in sequence, I open the photo, crop it, resize(downsampled to a 64x64 resolution) and convert into a greyscale  
-                im = Image.open(dir).crop((20,45,150,185)).resize((64,64)).convert("L")#140x140 before resize #crop((30,55,150,175))#120x120
+                im = Image.open(dir).crop((20,45,150,185)).resize((64,64))#.convert("L")#140x140 before resize #crop((30,55,150,175))#120x120
                 #save the new image into that directory
                 im.save(str(self.path_dataset+"/"+"real_"+photo))
 
@@ -75,7 +75,7 @@ TODO #4
         mixed the dataset, by returning a list containing the path of every single image, which will be needed when we have to upload the mini batch
         a stupid example of an entries of self.files is like: "/Users/tommasoancilli/Desktop/Python/NN_proj/dataset/real_8328239.jpg"
         """
-        self.path_dataset = os.path.join(os.getcwd(),"dataset")
+        self.path_dataset = os.path.join(os.getcwd(),"dataset/")
 
         self.files = [os.path.join(self.path_dataset,f) for f in os.listdir(self.path_dataset)]
         self.true_labels = [1]*len(self.files)
@@ -89,7 +89,7 @@ TODO #4
         return self.files, self.true_labels
 
 
-    def load_and_conversion(self):
+    def load_and_conversion(self,file_img):
 
         """
         ----- INPUT -----
@@ -100,7 +100,7 @@ TODO #4
         label_tensor : tensor of the label 
         end_dataset : flag showing the bottom of the dataset 
         """
-
+        files = file_img
         self.end_dataset = False
 
         im = Image.open(self.files[self.file_id])
@@ -122,7 +122,7 @@ TODO #4
 
 
 
-    def mini_batch_creation(self, batch_size):
+    def mini_batch_creation(self, batch_size,file_img):
         """
         ------ INPUT ------
         batch_size: given by the users 
@@ -142,7 +142,7 @@ TODO #4
 
         while i < batch_size:
             
-            img,label,end_dataset_flag = self.load_and_conversion()
+            img,label,end_dataset_flag = self.load_and_conversion(file_img)
 
             self.data_batch_im.append(img)
             self.data_batch_label.append(label)
