@@ -5,7 +5,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     TODO #5
     TODO #6
     """
-    input: tensor (64,64,3) x,y,z dimension
+    input: tensor (5,5,5) x,y,z dimension
 
     output: tenror (64,64,3) xyz
 
@@ -15,7 +15,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     def __init__(self):
 
         self.layers = []
-
+        """
         self.layers.append(nn.Conv2d(3, 64, kernel_size=3, padding=1)) #stride = 1 default
         self.layers.append(nn.LeakyReLU(negative_slope=0.01, inplace=True))#layers.append(nn.ReLU(inplace=True))
 
@@ -34,6 +34,25 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
         self.layers.append(nn.Conv2d(64, 3, kernel_size=3, padding=1)) #stride = 1 default
         self.layers.append(nn.ReLU(inplace=True))
 
+        """
+        self.layers.append(nn.ConvTranspose2d(in_channels=5,out_channels=128,kernel_size=4,padding=2,stride=1))#[5,5,5] -> [4,4,128]
+        self.layers.append(nn.ReLU())
+        self.layers.append(nn.BatchNorm2d(128))
+
+        self.layers.append(nn.ConvTranspose2d(in_channels=128,out_channels=64,kernel_size=3,padding=2,stride=3))#[4,4,128] -> [8,8,64]
+        self.layers.append(nn.ReLU())
+        self.layers.append(nn.BatchNorm2d(64))
+
+        self.layers.append(nn.ConvTranspose2d(in_channels=64,out_channels=32,kernel_size=4,padding=1,stride=2))#[8,8,64] -> [16,16,32]
+        self.layers.append(nn.ReLU())
+        self.layers.append(nn.BatchNorm2d(32))
+
+        self.layers.append(nn.ConvTranspose2d(in_channels=32,out_channels=16,kernel_size=4,padding=1,stride=2))#[16,16,32] -> [32,32,16]
+        self.layers.append(nn.ReLU())
+
+        self.layers.append(nn.ConvTranspose2d(in_channels=16,out_channels=3,kernel_size=2,padding=0,stride=2))#[32,32,16] -> [64,64,3]
+        self.layers.append(nn.ReLU())
+
         self.net = nn.Sequential(*self.layers)
 
         self.position = 0
@@ -51,7 +70,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
       """
 
-      self.image_output = self.net(x_input)*255
+      self.image_output = self.net(x_input)
       
       self.label_fake_img = torch.tensor([[0]*len(x_input)])
 
@@ -70,7 +89,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       """
       cost_function = nn.BCELoss()
       true_label = true_label.to(torch.float)
-      loss = -cost_function(output_label_gen,true_label)
+      loss = cost_function(output_label_gen,true_label)
 
       return loss
 
@@ -80,9 +99,11 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       This function will be used to display a image or more after ending each batch/epoch...
       """
 
-      random_input = torch.rand((3,64,64))
+      random_input = torch.rand((1,5,5,5))
       transform = T.ToPILImage()#function to transform a tensor into a image
-      im = transform((self.net(random_input)*255))
+      out = self.net(random_input)
+      out = out.view(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
+      im = transform((out))
 
       return im.show()
 
@@ -96,7 +117,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       a tensor image (img) and a boolean function if the we have reached the end of the dataset
       """
 
-      img = torch.rand((3,64,64))
+      img = torch.rand((5,5,5))
       end_dataset = False
       
       if self.position <  length_dataset -1:
@@ -133,9 +154,9 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
         if last_batch:
           break
 
-      batch_input = torch.stack(self.batch_input,dim = 0)
+      self.batch_input = torch.stack(self.batch_input,dim = 0)
 
-      return batch_input, last_batch
+      return self.batch_input, last_batch
 
 
     def summary(self):
