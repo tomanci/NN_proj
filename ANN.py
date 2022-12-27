@@ -12,7 +12,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     Inner structure: an autoencoder where the third layer is the deepest 
     """
 
-    def __init__(self):
+    def __init__(self,processing_unit):
 
         self.layers = []
         """
@@ -55,6 +55,9 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
         self.net = nn.Sequential(*self.layers)
 
+        self.device = torch.device(processing_unit)
+        self.net = self.net.to(self.device)
+        
         self.position = 0
 
     
@@ -103,7 +106,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       transform = T.ToPILImage()#function to transform a tensor into a image
       out = self.net(random_input)
       out = out.view(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
-      im = transform((out))
+      im = transform(out)
 
       return im.show()
 
@@ -128,7 +131,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
       return img, end_dataset
     
-    def input_creation(self,length_dataset,batch_size):
+    def input_creation(self,length_dataset,batch_size,current_batch_dim = None):
       """
       ----- INPUT -----
       length_dataset -> int value 
@@ -137,25 +140,36 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       ----- OUTPUT -----
       batch_input, 4D tensor: #sample_batch x #channels x width x height  
       """
-      length_dataset = length_dataset
-      i = 0
-      self.batch_input = []
+      if current_batch_dim == None:
 
-      last_batch = False
+        length_dataset = length_dataset
+        i = 0
+        self.batch_input = []
 
-      while i < batch_size:
+        last_batch = False
 
-        img,end_dataset_flag = self.creation_image(length_dataset)
-        self.batch_input.append(img)
-        last_batch = end_dataset_flag
+        while i < batch_size:
 
-        i = i + 1
-      
-        if last_batch:
-          break
+          img,end_dataset_flag = self.creation_image(length_dataset)
+          self.batch_input.append(img)
+          last_batch = end_dataset_flag
 
-      self.batch_input = torch.stack(self.batch_input,dim = 0)
+          i = i + 1
+        
+          if last_batch:
+            break
 
+        self.batch_input = torch.stack(self.batch_input,dim = 0)
+
+      else:
+        
+        last_batch = False
+        
+        self.batch_input = torch.rand((current_batch_dim))
+
+
+
+      #print("type value BEFORE GOING TO THE MAIN",type(self.batch_input),self.batch_input.size)
       return self.batch_input, last_batch
 
 
@@ -186,11 +200,15 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     
       print(param_string)
 
+    def save(self,file_name):
+
+      torch.save(self.net.state_dict(), file_name)
+
 
 
 class Discriminator():
 
-    def __init__(self):
+    def __init__(self,processing_unit):
         self.layers = []
 
         self.layers.append(nn.Conv2d(3,32,kernel_size=7,padding = "same"))#64x64x32
@@ -214,6 +232,9 @@ class Discriminator():
         self.layers.append(nn.Sigmoid())
 
         self.net = nn.Sequential(*self.layers)
+
+        self.device = torch.device(processing_unit)
+        self.net = self.net.to(self.device)
 
     
     def combined_True_Fake(self, fake_labels, fake_images, true_labels, true_images):
@@ -278,3 +299,6 @@ class Discriminator():
       loss = cost_function(output_label_dis,true_label)
 
       return loss
+
+    def save(self,file_name):
+      torch.save(self.net.state_dict(), file_name)
