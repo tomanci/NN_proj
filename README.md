@@ -24,3 +24,16 @@ The activation function in the first two layers are LeakyReLu so that I want tha
 
 *Pre Processig:* cropped the image -passing from 218x180 to 140x140, risize to a manageable size(64x64) converted to black-and-white. I have taken randomly slightly than 1/4 of the data and those will be used to generate faces.
 Moreover, other functions have been added. Indeed one shuffle the dataset randomizing it, while the other two are needed to construct a mini batch sample to feed the discriminator. One of them has only to load the image and convert it into a tensor while the other has to append all the images into a 4D tensor. 
+
+
+-------- DATA USED -------
+
+Con la CNN + Autoencoder (Generator) non ho ottenuto risultati: ovvero dopo poce epoce, vi era una saturazione e ne il discrimator o generator eran in grado di imparare ed erano fermi. ( si vede dalla loss che non scende)
+
+Quindi sono passato all'archittettura che su internet viene utilizzata.
+
+primo problema: alla 3 epoca, circa con learning rate uguale per entrambi, il discriminator "sopprimeva" il generator, nel senco che il gioco di min-max volgeva in favore del discriminator. Entrambe le loss convergenvano verso 0, risultanto dell'impossibilità di apprendere da parte del generator.
+Soluzione (a):
+cambiato il learning rate, dopo varie prove lr_g = 1*10^-3; lr_d = 1*10^-5
+Soluzione (b):
+cambiato funzione di ottimmizazione. Invece di massimizzare sum(- (1-y)log(1-d(g))). cerco di minimizzare sum(-log(d(g))). 
