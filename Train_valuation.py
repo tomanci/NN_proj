@@ -1,5 +1,7 @@
+import torch
+import torch.nn as nn
 
-def train_lr(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,processing_unit):
+def train_lr(architecture_G,architecture_D,batch_size,n_epochs,dataset,lr_g,lr_d,processing_unit,p_subset):
 
     """
     I change the learning rate
@@ -15,23 +17,26 @@ def train_lr(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,proce
 
     """
 
-    gen_net = Generator
-    dis_net = Discriminator
+    gen_net = architecture_G
+    dis_net = architecture_D
     best_epoch_G = -1
     best_epoch_D = -1
 
-    dataset.preprocessing() 
+    dataset.preprocessing(p_subset) 
     
 
     
-    optimizer_gen = torch.optim.Adam([p for p in gen_net.parameters() if p.requires_grad], lr_g, maximize=True) #torch.optim.Adam(filter(lambda p: p.requires_grad, self.net.parameters()), lr)
-    optimizer_dis = torch.optim.Adam([p for p in dis_net.parameters() if p.requires_grad], lr_d, maximize=False)
+    optimizer_gen = torch.optim.Adam([p for p in gen_net.net.parameters() if p.requires_grad], lr_g, maximize=True) #torch.optim.Adam(filter(lambda p: p.requires_grad, self.net.parameters()), lr)
+    optimizer_dis = torch.optim.Adam([p for p in dis_net.net.parameters() if p.requires_grad], lr_d, maximize=False)
 
     best_loss_D = 1000000000000 
     best_loss_G = 1000000000000
 
     gen_net.net.train()
     dis_net.net.train()
+
+    loss_D_batch = []
+    loss_G_batch = []
 
     for e in range(0,n_epochs):
 
@@ -42,8 +47,6 @@ def train_lr(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,proce
         length_dataset = len(image_file)
 
         counter_batches = 0
-        tot_loss_D = 0
-        tot_loss_G = 0
         avg_loss_D = 0
         avg_loss_G = 0
 
@@ -85,7 +88,11 @@ def train_lr(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,proce
             mini_batch_lab_comb = mini_batch_lab_comb.to(processing_unit)
 
             loss_dis = dis_net.function_loss_D(output_label_dis = predicted_label,true_label = mini_batch_lab_comb)
-            tot_loss_D = tot_loss_D + loss_dis
+
+            loss_D_batch.append(loss_dis.item())
+
+            avg_loss_D = avg_loss_D + loss_dis
+            print("loss DISCRIMINATOR,", loss_dis ,avg_loss_D)
 
             optimizer_dis.zero_grad()
             loss_dis.backward()
@@ -110,7 +117,10 @@ def train_lr(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,proce
 
             loss_gen = gen_net.function_loss_G(output_label_gen = predicted_label_generated, true_label = fake_target)
 
-            tot_loss_G = tot_loss_G + loss_gen 
+            loss_G_batch.append(loss_gen.item())
+            avg_loss_G = avg_loss_G + loss_gen 
+
+            print("loss GENERATOR", loss_gen, avg_loss_G)
 
             optimizer_gen.zero_grad()
             loss_gen.backward()
@@ -122,8 +132,8 @@ def train_lr(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,proce
 
         #gen_net.image_generation()
 
-        avg_loss_G = tot_loss_G/counter_batches
-        avg_loss_D = tot_loss_D/counter_batches
+        avg_loss_G = avg_loss_G/counter_batches
+        avg_loss_D = avg_loss_D/counter_batches
 
         if avg_loss_D < best_loss_D:
             best_loss_D = avg_loss_D
@@ -164,35 +174,7 @@ def separation(predicted_label):
     return fake_label
     
 
-def parse_command_line_arguments():
-    """Parse command line arguments, checking their values."""
-
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('device', type = str, choices=['colab', 'local'],
-                        help='where the scripts will run')
-    parser.add_argument('lr_g', type=float, default=0.001,
-                        help='learning rate (Adam) (default: 0.001) for GENERATOR')
-    parser.add_argument('lr_d', type=float, default=0.00001,
-                        help='learning rate (Adam) (default: 0.00001) for DISCRIMINATOR')
-    parser.add_argument('path_source', type=str, default = "/Users/tommasoancilli/Downloads/img_celeba_dataset.zip",
-                        help='where the downloaded dataset is stored: mine was in /Users/tommasoancilli/Downloads/img_celeba_dataset.zip')
-    parser.add_argument('path_destination', type=str, default = "/Users/tommasoancilli/Desktop/Python/NN_proj/img_celeba_dataset",
-                        help='where you want to store the unzipped dataset: mine was in /Users/tommasoancilli/Desktop/Python/NN_proj/img_celeba_dataset')
-    parser.add_argument('p_subset', type=float, default='0.25',
-                        help='fraction of data kept for generating the images')
-    parser.add_argument('batch_size', type=int, default=100,
-                        help='mini-batch size (default: 100)')
-    parser.add_argument('epochs', type=int, default=15,
-                        help='number of training epochs (default: 15)')
-    #parser.add_argument('--backbone', type=str, default='resnet', choices=['resnet', 'simplecnn'],
-                       # help='backbone network for feature extraction (default: resnet)"')
-
-    parsed_arguments = parser.parse_args()
-
-    return parsed_arguments
-
-
-def train_lr_obj(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,processing_unit):
+def train_lr_obj(architecture_G,architecture_D,batch_size,n_epochs,dataset,lr_g,lr_d,processing_unit,p_subset):
 
     """
     Here I modify the learning rate and also the cost function of the generator. Indeed, now I do not want to maximize sum(-(1-y)log(D(G))) but rather
@@ -209,23 +191,26 @@ def train_lr_obj(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,p
 
     """
 
-    gen_net = Generator
-    dis_net = Discriminator
+    gen_net = architecture_G
+    dis_net = architecture_D
     best_epoch_G = -1
     best_epoch_D = -1
 
-    dataset.preprocessing() 
+    dataset.preprocessing(p_subset) 
     
 
     
-    optimizer_gen = torch.optim.Adam([p for p in gen_net.parameters() if p.requires_grad], lr_g, maximize=False) 
-    optimizer_dis = torch.optim.Adam([p for p in dis_net.parameters() if p.requires_grad], lr_d, maximize=False)
+    optimizer_gen = torch.optim.Adam([p for p in gen_net.net.parameters() if p.requires_grad], lr_g, maximize=False) 
+    optimizer_dis = torch.optim.Adam([p for p in dis_net.net.parameters() if p.requires_grad], lr_d, maximize=False)
 
     best_loss_D = 1000000000000 
     best_loss_G = 1000000000000
 
     gen_net.net.train()
     dis_net.net.train()
+
+    loss_G_batch = []
+    loss_D_batch = []
 
     for e in range(0,n_epochs):
 
@@ -236,8 +221,6 @@ def train_lr_obj(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,p
         length_dataset = len(image_file)
 
         counter_batches = 0
-        tot_loss_D = 0
-        tot_loss_G = 0
         avg_loss_D = 0
         avg_loss_G = 0
 
@@ -279,7 +262,11 @@ def train_lr_obj(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,p
             mini_batch_lab_comb = mini_batch_lab_comb.to(processing_unit)
 
             loss_dis = dis_net.function_loss_D(output_label_dis = predicted_label,true_label = mini_batch_lab_comb)
-            tot_loss_D = tot_loss_D + loss_dis
+
+            loss_D_batch.append(loss_dis.item())
+
+            avg_loss_D = avg_loss_D + loss_dis
+            print("loss DISCRIMINATOR,", loss_dis ,avg_loss_D)
 
             optimizer_dis.zero_grad()
             loss_dis.backward()
@@ -293,8 +280,8 @@ def train_lr_obj(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,p
             x_gen_input,_ = gen_net.input_creation(length_dataset = length_dataset , batch_size = batch_size, current_batch_dim = current_batch_dim)
             x_gen_input = x_gen_input.to(processing_unit)
 
-            x_gen_input,_ = gen_net.input_creation(length_dataset = length_dataset , batch_size = batch_size, current_batch_dim = current_batch_dim)
             image_output_fake,_ = gen_net.forward_G(x_gen_input)
+
             predicted_label_generated = dis_net.forward_D(image_output_fake)
 
             #move to processing unit
@@ -303,7 +290,10 @@ def train_lr_obj(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,p
 
             loss_gen = gen_net.function_loss_G(output_label_gen=predicted_label_generated, true_label=mini_batch_label_real)    
 
-            tot_loss_G = tot_loss_G + loss_gen 
+            loss_G_batch.append(loss_gen.item())
+            avg_loss_G = avg_loss_G + loss_gen 
+
+            print("loss GENERATOR", loss_gen, avg_loss_G)
 
             optimizer_gen.zero_grad()
             loss_gen.backward()
@@ -315,8 +305,8 @@ def train_lr_obj(Generator,Discriminator,batch_size,n_epochs,dataset,lr_g,lr_d,p
 
         #gen_net.image_generation()
 
-        avg_loss_G = tot_loss_G/counter_batches
-        avg_loss_D = tot_loss_D/counter_batches
+        avg_loss_G = avg_loss_G/counter_batches
+        avg_loss_D = avg_loss_D/counter_batches
 
         if avg_loss_D < best_loss_D:
             best_loss_D = avg_loss_D

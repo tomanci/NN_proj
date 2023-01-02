@@ -1,9 +1,16 @@
+import torch.nn as nn
+import torch
+from torchvision import transforms 
+import torchvision.transforms as T
+ 
 class Generator(): #può sia essere il Generator nelle GAN che una classica NN negli adversarial attack
-    TODO #1
-    TODO #2
-    TODO #3
-    TODO #5
-    TODO #6
+    """
+    #TODO #1
+    #TODO #2
+    #TODO #3
+    #TODO #5
+    #TODO #6
+    """
     """
     input: tensor (5,5,5) x,y,z dimension
 
@@ -12,20 +19,21 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
     Inner structure: an autoencoder where the third layer is the deepest 
     """
 
-    def __init__(self,processing_unit):
-
+    def __init__(self,processing_unit,structure):
+        
+      if structure == "CNN":
         self.layers = []
-        """
+
         self.layers.append(nn.Conv2d(3, 64, kernel_size=3, padding=1)) #stride = 1 default
         self.layers.append(nn.LeakyReLU(negative_slope=0.01, inplace=True))#layers.append(nn.ReLU(inplace=True))
 
         self.layers.append(nn.Conv2d(64, 128, kernel_size=5,padding=2)) #stride = 1 default
         self.layers.append(nn.LeakyReLU(negative_slope=0.01, inplace=True))
 
-        #depthwise separable CNN layer
-        self.layers.append(nn.Conv2d(128,128,kernel_size=7,padding=3,groups=128))
-        self.layers.append(nn.Conv2d(128,256,kernel_size=1))
-        #self.layers.append(nn.Conv2d(128, 256, kernel_size=7, padding=3)) #stride = 1 default
+          #depthwise separable CNN layer
+        #self.layers.append(nn.Conv2d(128,128,kernel_size=7,padding=3,groups=128))
+        #self.layers.append(nn.Conv2d(128,256,kernel_size=1))
+        self.layers.append(nn.Conv2d(128, 256, kernel_size=7, padding=3)) #stride = 1 default
         self.layers.append(nn.LeakyReLU(negative_slope=0.01, inplace=True))
 
         self.layers.append(nn.Conv2d(256, 64, kernel_size=3, padding=1)) #stride = 1 default
@@ -34,7 +42,15 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
         self.layers.append(nn.Conv2d(64, 3, kernel_size=3, padding=1)) #stride = 1 default
         self.layers.append(nn.ReLU(inplace=True))
 
-        """
+        self.net = nn.Sequential(*self.layers)
+
+        self.input_shape = (3,64,64)
+
+        
+      elif structure == "conventional":
+        
+        self.layers = []
+
         self.layers.append(nn.ConvTranspose2d(in_channels=5,out_channels=128,kernel_size=4,padding=2,stride=1))#[5,5,5] -> [4,4,128]
         self.layers.append(nn.ReLU())
         self.layers.append(nn.BatchNorm2d(128))
@@ -55,10 +71,12 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
         self.net = nn.Sequential(*self.layers)
 
-        self.device = torch.device(processing_unit)
-        self.net = self.net.to(self.device)
+        self.input_shape = (5,5,5)
         
-        self.position = 0
+      self.device = torch.device(processing_unit)
+      self.net = self.net.to(self.device)
+      self.position = 0
+
 
     
     def forward_G(self, x_input):
@@ -102,7 +120,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       This function will be used to display a image or more after ending each batch/epoch...
       """
 
-      random_input = torch.rand((1,5,5,5))
+      random_input = torch.rand((1,self.input_shape))
       transform = T.ToPILImage()#function to transform a tensor into a image
       out = self.net(random_input)
       out = out.view(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
@@ -120,7 +138,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       a tensor image (img) and a boolean function if the we have reached the end of the dataset
       """
 
-      img = torch.rand((5,5,5))
+      img = torch.rand(self.input_shape)
       end_dataset = False
       
       if self.position <  length_dataset -1:

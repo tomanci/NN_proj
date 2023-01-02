@@ -1,28 +1,26 @@
+import shutil 
+import PIL
+import os 
+from PIL import Image
+import torch
+from torchvision import transforms 
+import torchvision.transforms as T
+
 class Dataset():
     """
     We transfer the kaggle dataset into a folder where the python environment is. 
     path_source is where the kaggle dataset downloaded is, path destination is where it should be placed the unzipped dataset.[by default there are my paths] 
     """
-TODO #4
-    def __init__(self,device,path_source = "/Users/tommasoancilli/Downloads/img_celeba_dataset.zip",path_destination= "/Users/tommasoancilli/Desktop/Python/NN_proj/img_celeba_dataset"):
+    """#TODO #4"""
+    def __init__(self,path_source = "/Users/tommasoancilli/Downloads/img_celeba_dataset.zip",path_destination= "/Users/tommasoancilli/Desktop/Python/NN_proj/img_celeba_dataset"):
 
         self.path_source = path_source
         self.path_destination = path_destination
-        self.device = device
         self.file_id = 0
         self.files = []
         self.true_labels = []
 
-        if self.device == "colab":
-            !pip install unzip
-            from google.colab import drive
-            drive.mount('/content/gdrive')
-            !cp /content/gdrive/MyDrive/NN_dataset/img_celeba_dataset.zip /content
-            !unzip "/content/img_celeba_dataset.zip" -d "/content"
-        
-        elif self.device == "local":
-
-            shutil.unpack_archive(self.path_source, self.path_destination)    
+        shutil.unpack_archive(self.path_source, self.path_destination)    
             
         
     def preprocessing(self,p_subset=0.25):
@@ -43,7 +41,8 @@ TODO #4
         self.p_subset = p_subset
 
         #creation of the path where the initial dataset is present
-        #self.path_destination = #current_path = os.path.join(os.getcwd(),"img_celeba_dataset")
+        self.path_destination = str(self.path_destination+"/img_celeba_dataset")
+        print(self.path_destination)
 
         #creation of the path where the new dataset will be stored
         self.path_dataset = os.path.join(os.getcwd(),"dataset")
