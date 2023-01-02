@@ -12902,3 +12902,7 @@ NN_proj_venv/lib/python3.9/site-packages/argparse-1.4.0.dist-info/RECORD
 NN_proj_venv/lib/python3.9/site-packages/argparse-1.4.0.dist-info/REQUESTED
 NN_proj_venv/lib/python3.9/site-packages/argparse-1.4.0.dist-info/top_level.txt
 NN_proj_venv/lib/python3.9/site-packages/argparse-1.4.0.dist-info/WHEEL
+__pycache__/ANN.cpython-39.pyc
+__pycache__/Dataset_creator.cpython-39.pyc
+__pycache__/Requirements.cpython-39.pyc
+__pycache__/Train_valuation.cpython-39.pyc
