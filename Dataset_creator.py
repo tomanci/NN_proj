@@ -121,7 +121,7 @@ class Dataset():
 
 
 
-    def mini_batch_creation(self, batch_size,file_img):
+    def mini_batch_creation(self, batch_size:int,file_img):
         """
         ------ INPUT ------
         batch_size: given by the users 

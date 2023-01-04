@@ -3,7 +3,7 @@ import torch
 from torchvision import transforms 
 import torchvision.transforms as T
  
-class Generator(): #può sia essere il Generator nelle GAN che una classica NN negli adversarial attack
+class Generator(): 
     """
     #TODO #1
     #TODO #2
@@ -30,7 +30,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
         self.layers.append(nn.Conv2d(64, 128, kernel_size=5,padding=2)) #stride = 1 default
         self.layers.append(nn.LeakyReLU(negative_slope=0.01, inplace=True))
 
-          #depthwise separable CNN layer
+        #depthwise separable CNN layer
         #self.layers.append(nn.Conv2d(128,128,kernel_size=7,padding=3,groups=128))
         #self.layers.append(nn.Conv2d(128,256,kernel_size=1))
         self.layers.append(nn.Conv2d(128, 256, kernel_size=7, padding=3)) #stride = 1 default
@@ -79,7 +79,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
 
     
-    def forward_G(self, x_input):
+    def forward_G(self, x_input:torch.tensor):
 
       """
       ----- Input -----
@@ -98,7 +98,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       return self.image_output,self.label_fake_img
 
 
-    def function_loss_G(self,output_label_gen,true_label):
+    def function_loss_G(self,output_label_gen:torch.tensor,true_label:torch.tensor):
       """
       ----- INPUT -----
       output_label_gen -> tensor 1 x #batch_sample
@@ -117,10 +117,11 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
     def image_generation(self):
       """
-      This function will be used to display a image or more after ending each batch/epoch...
+      This function will be used to display a image after the ending of batch/epoch...
       """
-
-      random_input = torch.rand((1,self.input_shape))
+      #creation of a tuple (1,self.input_shape)
+      random_input = torch.rand(size= (1,)+self.input_shape)
+      random_input = random_input.to(self.device)
       transform = T.ToPILImage()#function to transform a tensor into a image
       out = self.net(random_input)
       out = out.view(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
@@ -129,7 +130,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
       return im.show()
 
 
-    def creation_image(self, length_dataset):
+    def creation_image(self, length_dataset:int):
       """
       ----- INPUT -----
       length_dataset -> int value
@@ -149,7 +150,7 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
 
       return img, end_dataset
     
-    def input_creation(self,length_dataset,batch_size,current_batch_dim = None):
+    def input_creation(self,length_dataset:int,batch_size:int,current_batch_dim = None):
       """
       ----- INPUT -----
       length_dataset -> int value 
@@ -186,37 +187,17 @@ class Generator(): #può sia essere il Generator nelle GAN che una classica NN n
         self.batch_input = torch.rand((current_batch_dim))
 
 
-
-      #print("type value BEFORE GOING TO THE MAIN",type(self.batch_input),self.batch_input.size)
       return self.batch_input, last_batch
 
 
     def summary(self):
-    
-      total_param = 0
-      param_string = ""
-
-      for l in self.layers:
-        parameters = 0
-
-        if "Conv" in str(l):
-          param_string = param_string + "======================================================" + "\n"
-          param_string = param_string + str(l) + "\n"
-          param_string = l.in_channels * l.kernel_size[0]*l.kernel_size[1]*l.out_channels + l.out_channels
-          param_string = param_string + "Number of parameters for this layer: {}".format(parameters) + "\n"
-
-          total_param = total_param + parameters
-        
-        else:
-          param_string = param_string + "======================================================" + "\n"
-          param_string = param_string + str(l) + "\n"
-          param_string = param_string + "Number of parameters for this layer:{} ".format(parameters)+"\n"
-
-      param_string = param_string + "----------------------------------------------------" + "\n"  
-      param_string = param_string + "Total number of learnable parameters: {}".format(total_param)
-
-    
-      print(param_string)
+      """
+      summary of the model 
+      """
+      for idx,l in enumerate(self.layers):
+        print(idx+1, "->",l)
+        if "LU" in str(l):
+          print("\n")
 
     def save(self,file_name):
 
@@ -255,7 +236,7 @@ class Discriminator():
         self.net = self.net.to(self.device)
 
     
-    def combined_True_Fake(self, fake_labels, fake_images, true_labels, true_images):
+    def combined_True_Fake(self, fake_labels:torch.tensor, fake_images:torch.tensor, true_labels:torch.tensor, true_images:torch.tensor):
       """
         ----- Input ----
         fake_labels, fake_images, true_labels, true_images -> tensor
@@ -290,7 +271,7 @@ class Discriminator():
 
       return combined_images,combined_labels
 
-    def forward_D(self,images):
+    def forward_D(self,images:torch.tensor):
       """
       ----- INPUT -----
       image -> tensor 2*#batch_size x #channels x width x height
@@ -302,7 +283,7 @@ class Discriminator():
       self.output = self.output.to(torch.float32)
       return self.output 
       
-    def function_loss_D(self,output_label_dis,true_label):
+    def function_loss_D(self,output_label_dis:torch.tensor,true_label:torch.tensor):
       """
       ----- INPUT -----
       output_label_dis -> 2*#batch_size x 1
@@ -320,3 +301,13 @@ class Discriminator():
 
     def save(self,file_name):
       torch.save(self.net.state_dict(), file_name)
+
+    
+    def summary(self):
+      """
+      summary of the model 
+      """
+      for idx,l in enumerate(self.layers):
+        print(idx+1, "->",l)
+        if "LU" in str(l):
+          print("\n")

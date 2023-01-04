@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-def train_lr(architecture_G,architecture_D,batch_size,n_epochs,dataset,lr_g,lr_d,processing_unit,p_subset):
+def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,lr_g:int,lr_d:int,processing_unit,p_subset:int):
 
     """
     I change the learning rate
@@ -174,7 +174,7 @@ def separation(predicted_label):
     return fake_label
     
 
-def train_lr_obj(architecture_G,architecture_D,batch_size,n_epochs,dataset,lr_g,lr_d,processing_unit,p_subset):
+def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,lr_g:int,lr_d:int,processing_unit,p_subset:int):
 
     """
     Here I modify the learning rate and also the cost function of the generator. Indeed, now I do not want to maximize sum(-(1-y)log(D(G))) but rather
