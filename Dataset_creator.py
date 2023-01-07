@@ -72,7 +72,7 @@ class Dataset():
 
         """
         mixed the dataset, by returning a list containing the path of every single image, which will be needed when we have to upload the mini batch
-        a stupid example of an entries of self.files is like: "/Users/tommasoancilli/Desktop/Python/NN_proj/dataset/real_8328239.jpg"
+        a trivial example of an entries of self.files is like: "/Users/tommasoancilli/Desktop/Python/NN_proj/dataset/real_8328239.jpg"
         """
         self.path_dataset = os.path.join(os.getcwd(),"dataset/")
 
@@ -91,6 +91,7 @@ class Dataset():
     def load_and_conversion(self,file_img):
 
         """
+        it loads and converts the images into a tensor format 
         ----- INPUT -----
 
         ----- OUTPUT -----
@@ -123,6 +124,7 @@ class Dataset():
 
     def mini_batch_creation(self, batch_size:int,file_img):
         """
+        create the a batch containing the images processed
         ------ INPUT ------
         batch_size: given by the users 
 

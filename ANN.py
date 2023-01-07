@@ -16,7 +16,7 @@ class Generator():
 
     output: tenror (64,64,3) xyz
 
-    Inner structure: an autoencoder where the third layer is the deepest 
+    Inner structure: with the parameter "structure" an autoencoder net or a paper-based net can be deployed   
     """
 
     def __init__(self,processing_unit,structure):
@@ -106,7 +106,7 @@ class Generator():
       ----- OUTPUT -----
 
       loss function. (scalar value)
-      (it is negative because we want to maximize and generally backprop follows the discent of the gradient, so the max = - min )
+
       """
       cost_function = nn.BCELoss()
       true_label = true_label.to(torch.float)
@@ -152,6 +152,9 @@ class Generator():
     
     def input_creation(self,length_dataset:int,batch_size:int,current_batch_dim = None):
       """
+      This function create a tensor for feeding the generator net. 
+      If current_batch_dim = None, the output is feed into the discriminator without propagating the gradient till the generator. 
+
       ----- INPUT -----
       length_dataset -> int value 
       batch_size -> int value
@@ -238,6 +241,7 @@ class Discriminator():
     
     def combined_True_Fake(self, fake_labels:torch.tensor, fake_images:torch.tensor, true_labels:torch.tensor, true_images:torch.tensor):
       """
+      The true and generated images are combined together 
         ----- Input ----
         fake_labels, fake_images, true_labels, true_images -> tensor
         dimensions:
