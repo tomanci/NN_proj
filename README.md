@@ -7,6 +7,7 @@ To run the script you have to pick out one out of main_colab or main_local.
 *main_colab* was created due to the necessity to have a GPU to make the experiments. The only requirement is to have a folder called NN_dataset and the zipped dataset in it. Once this requiriments has been fulfilled you can freely run the script.
 
 *main_local* is 
+- dire dove metto il dataset e come fare per modificare il training + che non stampo qui 
 
 
 ## Brief description of the files

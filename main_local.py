@@ -24,8 +24,8 @@ def parse_command_line_arguments():
                         help='mini-batch size (default: 128)')
     parser.add_argument('epochs', type=int, default=15,
                         help='number of training epochs (default: 15)')
-    #parser.add_argument('--backbone', type=str, default='resnet', choices=['resnet', 'simplecnn'],
-                       # help='backbone network for feature extraction (default: resnet)"')
+    parser.add_argument('training', type=str, default='lr', choices=['lr', 'lr_obj'],
+                        help='which type of training function you want to use (default: train_lr)"')
 
     parsed_arguments = parser.parse_args()
 
@@ -40,12 +40,23 @@ if __name__ == "__main__":
 
     for k,v in args.__dict__.items():
         print(k + '=' + str(v))
-    
-    gen_net = Generator(processing_unit=processing_unit,structure = args.architecture_Generator)
+    if args.architecture_Generator == "conventional" or args.architecture_Generator == "CNN":
+        gen_net = Generator(processing_unit=processing_unit,structure = args.architecture_Generator)
+    else:
+        raise ValueError("Invalid architecture type!")
+
     dis_net = Discriminator(processing_unit=processing_unit)
 
     dataset = Dataset(path_source=args.path_source,path_destination=args.path_destination)
-
-    train_lr(architecture_G=gen_net,architecture_D=dis_net,batch_size=args.batch_size,
+    if args.training == "lr":
+        train_lr(architecture_G=gen_net,architecture_D=dis_net,batch_size=args.batch_size,
                 n_epochs=args.epochs,dataset=dataset, lr_g=args.lr_g, lr_d=args.lr_d, 
                 processing_unit=processing_unit,p_subset=args.p_subset)
+
+    elif args.training == "lr_obj":
+            train_lr_obj(architecture_G=gen_net,architecture_D=dis_net,batch_size=args.batch_size,
+            n_epochs=args.epochs,dataset=dataset, lr_g=args.lr_g, lr_d=args.lr_d, 
+            processing_unit=processing_unit,p_subset=args.p_subset)
+    else:
+        raise ValueError("Invalid training function!")
+
