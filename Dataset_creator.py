@@ -42,7 +42,6 @@ class Dataset():
 
         #creation of the path where the initial dataset is present
         self.path_destination = str(self.path_destination+"/img_celeba_dataset")
-        print(self.path_destination)
 
         #creation of the path where the new dataset will be stored
         self.path_dataset = os.path.join(os.getcwd(),"dataset")
@@ -60,8 +59,8 @@ class Dataset():
                 #directory of each photo example (../img_celeba_dataset/19736.jpeg)
                 dir = os.path.join(self.path_destination,photo)
 
-                #in sequence, I open the photo, crop it, resize(downsampled to a 64x64 resolution) and convert into a greyscale  
-                im = Image.open(dir).crop((20,45,150,185)).resize((64,64))#.convert("L")#140x140 before resize #crop((30,55,150,175))#120x120
+                #in sequence, I open the photo, crop it, resize(downsampled to a 64x64 resolution) 
+                im = Image.open(dir).crop((20,45,150,185)).resize((64,64))#140x140 
                 #save the new image into that directory
                 im.save(str(self.path_dataset+"/"+"real_"+photo))
 
@@ -100,7 +99,7 @@ class Dataset():
         label_tensor : tensor of the label 
         end_dataset : flag showing the bottom of the dataset 
         """
-        files = file_img
+        self.files = file_img
         self.end_dataset = False
 
         im = Image.open(self.files[self.file_id])

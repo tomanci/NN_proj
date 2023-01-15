@@ -24,7 +24,6 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
 
     dataset.preprocessing(p_subset) 
     
-
     
     optimizer_gen = torch.optim.Adam([p for p in gen_net.net.parameters() if p.requires_grad], lr_g, maximize=True) #torch.optim.Adam(filter(lambda p: p.requires_grad, self.net.parameters()), lr)
     optimizer_dis = torch.optim.Adam([p for p in dis_net.net.parameters() if p.requires_grad], lr_d, maximize=False)
@@ -88,7 +87,6 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
             mini_batch_lab_comb = mini_batch_lab_comb.to(processing_unit)
 
             loss_dis = dis_net.function_loss_D(output_label_dis = predicted_label,true_label = mini_batch_lab_comb)
-
             loss_D_batch.append(loss_dis.item())
 
             avg_loss_D = avg_loss_D + loss_dis
@@ -106,8 +104,8 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
             x_gen_input,_ = gen_net.input_creation(length_dataset = length_dataset , batch_size = batch_size, current_batch_dim = current_batch_dim)
             x_gen_input = x_gen_input.to(processing_unit)
 
-            x_gen_input,_ = gen_net.input_creation(length_dataset = length_dataset , batch_size = batch_size, current_batch_dim = current_batch_dim)
             image_output_fake,fake_target = gen_net.forward_G(x_gen_input)
+            
             predicted_label_generated = dis_net.forward_D(image_output_fake)
             fake_target = fake_target.view(-1,1)
 
@@ -159,20 +157,6 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
         print("========================================================================================= \n")
 
 
-
-def separation(predicted_label):
-
-    """
-    divide the true from the generated data in orded to do backprop in the generator 
-    """
-
-    length = int(predicted_label.shape[0]/2)
-
-    fake_label = predicted_label[length:]
-    fake_label = fake_label.view(1,-1)
-
-    return fake_label
-    
 
 def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,lr_g:int,lr_d:int,processing_unit,p_subset:int):
 
@@ -286,7 +270,7 @@ def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,datas
 
             #move to processing unit
             predicted_label_generated = predicted_label_generated.to(processing_unit)
-            mini_batch_label_real = mini_batch_label_real.view(-1,1).to(processing_unit)
+            mini_batch_label_real = mini_batch_label_real.view(-1,1).to(processing_unit)#mini_batch_label_real is a tensor full of 1s
 
             loss_gen = gen_net.function_loss_G(output_label_gen=predicted_label_generated, true_label=mini_batch_label_real)    
 
