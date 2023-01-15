@@ -2,12 +2,14 @@
 *Made by*: **Ancilli Tommaso, University of Siena**
 
 ## How to use the script
-To run the script you have to pick out one out of main_colab or main_local.
+To run the script you have to pick out one out of main_colab or main_local. The only aspect that needs to be set-up before running the script is the presence of the dataset. I am refering to not the original one, called "celeba-dataset.zip" but the "img_celeba_dataset.zip" - coming from after manually cleaning the original dataset.
 
-*main_colab* was created due to the necessity to have a GPU to make the experiments. The only requirement is to have a folder called NN_dataset and the zipped dataset in it. Once this requiriments has been fulfilled you can freely run the script.
 
-*main_local* is 
-- dire dove metto il dataset e come fare per modificare il training + che non stampo qui 
+*main_colab* was created due to the necessity to have a GPU to make the experiments. The only requirement is to have a folder called NN_dataset and the zipped dataset in it. Once this requiriments has been fulfilled you can freely run the script. 
+
+The only difference in terms of packages is the presence of matlab to plot the loss function of both Generator and Discriminator for each mini-batch. 
+
+*main_local* contains all the other scripts. To run the script you have to pass from inputs, throught the command line, the parameters. Again you have to pay attantion and locate exactly the position of your zipped file. The final dataset, composed of the subset of the original data taken for our purposes, will be placed on your current folder.
 
 
 ## Brief description of the files
