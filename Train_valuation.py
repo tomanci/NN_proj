@@ -4,7 +4,7 @@ import torch.nn as nn
 def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,lr_g:int,lr_d:int,processing_unit,p_subset:int):
 
     """
-    I change the learning rate
+    This function perform the first solution proposed by the paper on how to train the Generator/Discriminator
 
     ----- INPUT -----
     Generator -> class of the generator
@@ -25,7 +25,7 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
     dataset.preprocessing(p_subset) 
     
     
-    optimizer_gen = torch.optim.Adam([p for p in gen_net.net.parameters() if p.requires_grad], lr_g, maximize=True) #torch.optim.Adam(filter(lambda p: p.requires_grad, self.net.parameters()), lr)
+    optimizer_gen = torch.optim.Adam([p for p in gen_net.net.parameters() if p.requires_grad], lr_g, maximize=True) 
     optimizer_dis = torch.optim.Adam([p for p in dis_net.net.parameters() if p.requires_grad], lr_d, maximize=False)
 
     best_loss_D = 1000000000000 
@@ -161,7 +161,7 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
 def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,lr_g:int,lr_d:int,processing_unit,p_subset:int):
 
     """
-    Here I modify the learning rate and also the cost function of the generator. Indeed, now I do not want to maximize sum(-(1-y)log(D(G))) but rather
+    Here I modify the learning rate and also the cost function of the Generator. Indeed, now I do not maximize sum(-(1-y)log(D(G))) but rather
     I aim to minizime sum(ylog(D(G))). For this reason i falsly impose y = 1. 
 
     ----- INPUT -----
@@ -287,7 +287,6 @@ def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,datas
             last_batch = last_batch_flag
 
 
-        #gen_net.image_generation()
 
         avg_loss_G = avg_loss_G/counter_batches
         avg_loss_D = avg_loss_D/counter_batches

@@ -4,13 +4,7 @@ from torchvision import transforms
 import torchvision.transforms as T
  
 class Generator(): 
-    """
-    #TODO #1
-    #TODO #2
-    #TODO #3
-    #TODO #5
-    #TODO #6
-    """
+
     """
     input: tensor (5,5,5) x,y,z dimension
 
@@ -124,6 +118,7 @@ class Generator():
       random_input = random_input.to(self.device)
       transform = T.ToPILImage()#function to transform a tensor into a image
       out = self.net(random_input)
+      #since our input is a 4D tensor, to create a RGB image we have to change their view
       out = out.view(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
       im = transform(out)
 
@@ -132,6 +127,8 @@ class Generator():
 
     def creation_image(self, length_dataset:int):
       """
+      create a single (4D) tensor image
+
       ----- INPUT -----
       length_dataset -> int value
 
@@ -152,8 +149,8 @@ class Generator():
     
     def input_creation(self,length_dataset:int,batch_size:int,current_batch_dim = None):
       """
-      This function create a tensor for feeding the generator net. 
-      If current_batch_dim = None, the output is feed into the discriminator without propagating the gradient till the generator. 
+      This function create a tensor for feeding the generator net. dimension (batch_size x channels x width x height)
+      If current_batch_dim = None, the output is feed into the discriminator without propagating the gradient till the generator. The presence of this parameter indicates whether the discrimiator is trained or not.
 
       ----- INPUT -----
       length_dataset -> int value 

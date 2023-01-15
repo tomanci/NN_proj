@@ -11,7 +11,7 @@ class Dataset():
     We transfer the kaggle dataset into a folder where the python environment is. 
     path_source is where the kaggle dataset downloaded is, path destination is where it should be placed the unzipped dataset.[by default there are my paths] 
     """
-    """#TODO #4"""
+    
     def __init__(self,path_source = "/Users/tommasoancilli/Downloads/img_celeba_dataset.zip",path_destination= "/Users/tommasoancilli/Desktop/Python/NN_proj/img_celeba_dataset"):
 
         self.path_source = path_source
