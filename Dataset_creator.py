@@ -75,6 +75,7 @@ class Dataset():
         """
         self.path_dataset = os.path.join(os.getcwd(),"dataset/")
 
+        #shuffled the path of images and it put in a list
         self.files = [os.path.join(self.path_dataset,f) for f in os.listdir(self.path_dataset)]
         self.true_labels = [1]*len(self.files)
 
@@ -102,9 +103,11 @@ class Dataset():
         self.files = file_img
         self.end_dataset = False
 
+        #open the image
         im = Image.open(self.files[self.file_id])
         label = self.true_labels[self.file_id]
-         
+
+        #convert it into a tensor 
         convert_tensor = transforms.ToTensor()
 
         img_tensor = convert_tensor(im)
@@ -134,6 +137,7 @@ class Dataset():
 
 
         """
+        #initilize empty lists
         i = 0
         self.data_batch_im = []
         self.data_batch_label = []
@@ -144,6 +148,7 @@ class Dataset():
             
             img,label,end_dataset_flag = self.load_and_conversion(file_img)
 
+            #append the images till the number of example is reached
             self.data_batch_im.append(img)
             self.data_batch_label.append(label)
             last_batch = end_dataset_flag

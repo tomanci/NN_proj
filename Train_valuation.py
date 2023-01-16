@@ -24,19 +24,21 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
 
     dataset.preprocessing(p_subset) 
     
-    
+    # creating the optimizers
     optimizer_gen = torch.optim.Adam([p for p in gen_net.net.parameters() if p.requires_grad], lr_g, maximize=True) 
     optimizer_dis = torch.optim.Adam([p for p in dis_net.net.parameters() if p.requires_grad], lr_d, maximize=False)
 
     best_loss_D = 1000000000000 
     best_loss_G = 1000000000000
 
+    # setting both nets in 'train' mode 
     gen_net.net.train()
     dis_net.net.train()
 
     loss_D_batch = []
     loss_G_batch = []
 
+    #loop for each epoch
     for e in range(0,n_epochs):
 
 
@@ -44,11 +46,13 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
 
         image_file, _ = dataset.shuffled_dataset()
         length_dataset = len(image_file)
-
+        
+        #compute the average and the total loss for mini-batch/epoch
         counter_batches = 0
         avg_loss_D = 0
         avg_loss_G = 0
 
+        #loop on mini-batches
         while not last_batch:
 
             counter_batches = counter_batches + 1
@@ -86,6 +90,7 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
             predicted_label = predicted_label.to(processing_unit)
             mini_batch_lab_comb = mini_batch_lab_comb.to(processing_unit)
 
+            #computing loss fucntion discriminator 
             loss_dis = dis_net.function_loss_D(output_label_dis = predicted_label,true_label = mini_batch_lab_comb)
             loss_D_batch.append(loss_dis.item())
 
@@ -101,6 +106,7 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
             #BackProp Generator
             #----------
 
+            #fake batch creation
             x_gen_input,_ = gen_net.input_creation(length_dataset = length_dataset , batch_size = batch_size, current_batch_dim = current_batch_dim)
             x_gen_input = x_gen_input.to(processing_unit)
 
@@ -113,6 +119,7 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
             predicted_label_generated = predicted_label_generated.to(processing_unit)
             fake_target = fake_target.to(processing_unit)
 
+            #computing loss function for Generator
             loss_gen = gen_net.function_loss_G(output_label_gen = predicted_label_generated, true_label = fake_target)
 
             loss_G_batch.append(loss_gen.item())
@@ -128,7 +135,7 @@ def train_lr(architecture_G,architecture_D,batch_size:int,n_epochs:int,dataset,l
             last_batch = last_batch_flag
 
 
-        #gen_net.image_generation()
+        
 
         avg_loss_G = avg_loss_G/counter_batches
         avg_loss_D = avg_loss_D/counter_batches
@@ -183,19 +190,21 @@ def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,datas
     dataset.preprocessing(p_subset) 
     
 
-    
+    # creating the optimizers
     optimizer_gen = torch.optim.Adam([p for p in gen_net.net.parameters() if p.requires_grad], lr_g, maximize=False) 
     optimizer_dis = torch.optim.Adam([p for p in dis_net.net.parameters() if p.requires_grad], lr_d, maximize=False)
 
     best_loss_D = 1000000000000 
     best_loss_G = 1000000000000
 
+    # setting both nets in 'train' mode 
     gen_net.net.train()
     dis_net.net.train()
 
     loss_G_batch = []
     loss_D_batch = []
 
+    #loop for each epoch
     for e in range(0,n_epochs):
 
 
@@ -204,10 +213,12 @@ def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,datas
         image_file, _ = dataset.shuffled_dataset()
         length_dataset = len(image_file)
 
+        #compute the average and the total loss for mini-batch/epoch
         counter_batches = 0
         avg_loss_D = 0
         avg_loss_G = 0
 
+        #loop on mini-batches
         while not last_batch:
 
             counter_batches = counter_batches + 1
@@ -245,6 +256,7 @@ def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,datas
             predicted_label = predicted_label.to(processing_unit)
             mini_batch_lab_comb = mini_batch_lab_comb.to(processing_unit)
 
+            #computing loss fucntion discriminator 
             loss_dis = dis_net.function_loss_D(output_label_dis = predicted_label,true_label = mini_batch_lab_comb)
 
             loss_D_batch.append(loss_dis.item())
@@ -261,6 +273,7 @@ def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,datas
             #BackProp Generator
             #----------
 
+            #fake batch creation
             x_gen_input,_ = gen_net.input_creation(length_dataset = length_dataset , batch_size = batch_size, current_batch_dim = current_batch_dim)
             x_gen_input = x_gen_input.to(processing_unit)
 
@@ -271,7 +284,8 @@ def train_lr_obj(architecture_G,architecture_D,batch_size:int,n_epochs:int,datas
             #move to processing unit
             predicted_label_generated = predicted_label_generated.to(processing_unit)
             mini_batch_label_real = mini_batch_label_real.view(-1,1).to(processing_unit)#mini_batch_label_real is a tensor full of 1s
-
+            
+            #computing loss function for Generator
             loss_gen = gen_net.function_loss_G(output_label_gen=predicted_label_generated, true_label=mini_batch_label_real)    
 
             loss_G_batch.append(loss_gen.item())
